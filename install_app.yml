@@ -1,0 +1,44 @@
+---
+- hosts: proxy_server
+  become: yes
+  vars:
+     proxy_epel_repo_rmp: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+  tasks:
+     - include_tasks: tasks/setup-proxy.yml
+     - include_tasks: tasks/get-ssl.yml
+- hosts: database
+  become: yes
+  vars:
+    db_name: "carrental"
+  tasks:
+    - include_tasks: tasks/manage-db.yml
+    
+
+- hosts: app
+  become: yes
+  vars:
+    srv_location: /home/ec2-user/environment/201166/zaliczenie/server
+    client_location: /home/ec2-user/environment/201166/zaliczenie/front
+    app_location: /opt/carrental
+    app_user: carRent
+    telegraf_url: https://dl.influxdata.com/telegraf/releases/telegraf-1.8.3-1.x86_64.rpm
+    metrics_strorages_ip: 172.31.26.70
+  tasks:
+     - include_tasks: tasks/install-srv-dependencies.yml
+     - include_tasks: tasks/setupCarRental.yml
+     - include_tasks: tasks/manage-telegraf.yml 
+     
+- hosts: metrics
+  become: yes
+  vars:
+    influxdb_url: https://dl.influxdata.com/influxdb/releases/influxdb-1.7.1.x86_64.rpm
+    grafana_url: https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana-5.3.4-1.x86_64.rpm
+    grafana_ip: 18.197.134.146
+  tasks:
+    - include_tasks: tasks/stats.yml
+    - include_tasks: tasks/grafana-conf.yml
+   
+    
+     
+    
+     
